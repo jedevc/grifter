@@ -1,4 +1,4 @@
-from .transformer import main
+from .grifter import main
 
 if __name__ == "__main__":
     main()
