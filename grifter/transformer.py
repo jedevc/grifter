@@ -8,12 +8,13 @@ from .utils import gif
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-in", "--infile", required=True)
-    parser.add_argument("-out", "--outfile", required=True)
-    parser.add_argument("-src", "--source", required=True)
-    parser.add_argument("-sc", "--scale", type=float, default=1)
-    parser.add_argument("-f", "--frames", type=int, default=None)
-    parser.add_argument("-up", "--upscale", type=int, default=0)
+    parser.add_argument("-i", "--infile", required=True)
+    parser.add_argument("-o", "--outfile", required=True)
+    parser.add_argument("-t", "--target", required=True)
+    parser.add_argument("-s", "--scale", type=float, default=1)
+    parser.add_argument("--frames", type=int, default=None)
+    parser.add_argument("--upscale", type=int, default=0)
+    parser.add_argument("--model", choices=["cnn", "hog"], default="hog")
     args = parser.parse_args()
 
     if args.frames is not None and args.frames <= 0:
@@ -21,14 +22,14 @@ def main():
         return
 
     im = Image.open(args.infile)
-    source = Image.open(args.source)
+    target = Image.open(args.target)
 
     outputs = []
     for i, frame in enumerate(gif.get_frames(im)):
         print(f"\r[*] processing frame {i}", end="", flush=True)
 
         array = np.array(frame.convert('RGB'))
-        faces = face_recognition.face_locations(array, number_of_times_to_upsample=args.upscale, model='cnn')
+        faces = face_recognition.face_locations(array, number_of_times_to_upsample=args.upscale, model=args.model)
         # faces = face_recognition.face_locations(array, number_of_times_to_upsample=args.upscale)
 
         if len(faces) == 0:
@@ -42,15 +43,15 @@ def main():
             width = right - left
             height = bottom - top
             if width > height:
-                factor = source.width / width
+                factor = target.width / width
             else:
-                factor = source.height / height
-            ssource = source.resize((int(source.width / factor * args.scale), int(source.height / factor * args.scale)))
+                factor = target.height / height
+            rtarget = target.resize((int(target.width / factor * args.scale), int(target.height / factor * args.scale)))
 
-            output.paste(ssource, (
-                left - (ssource.width - width) // 2,
-                top - (ssource.height - height) // 2,
-            ), ssource)
+            output.paste(rtarget, (
+                left - (rtarget.width - width) // 2,
+                top - (rtarget.height - height) // 2,
+            ), rtarget)
 
         output = Image.alpha_composite(frame, output)
 
