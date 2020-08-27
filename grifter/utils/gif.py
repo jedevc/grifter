@@ -3,12 +3,13 @@ from PIL import Image
 FULL = "full"
 PARTIAL = "partial"
 
+
 def is_transparent(im):
-    '''
+    """
     Detect if an image has any transparent components.
 
     Based on https://stackoverflow.com/a/58567453
-    '''
+    """
 
     if im.mode == "P":
         transparent = im.info.get("transparency", -1)
@@ -22,13 +23,14 @@ def is_transparent(im):
 
     return False
 
+
 def analyze(im):
-    '''
+    """
     Determine the "mode" of the gif (full or additive).
 
     Based on https://gist.github.com/almost/d2832d0998ad9dfec2cacef934e7d247
-    '''
-    
+    """
+
     begin = im.tell()
 
     mode = FULL
@@ -52,33 +54,34 @@ def analyze(im):
     im.seek(begin)
     return mode
 
+
 def get_frames(im):
-    '''
+    """
     Iterate the GIF, extracting each frame.
 
     Based on https://gist.github.com/almost/d2832d0998ad9dfec2cacef934e7d247
-    '''
+    """
 
     mode = analyze(im)
 
     p = im.getpalette()
-    last_frame = im.convert('RGBA')
+    last_frame = im.convert("RGBA")
 
     while True:
         try:
-            '''
+            """
             If the GIF uses local colour tables, each frame will have its own palette.
             If not, we need to apply the global palette to the new frame.
-            '''
+            """
             if not im.getpalette():
                 im.putpalette(p)
 
-            new_frame = Image.new('RGBA', im.size)
+            new_frame = Image.new("RGBA", im.size)
 
             if mode == PARTIAL:
                 new_frame.paste(last_frame)
 
-            new_frame.paste(im, (0, 0), im.convert('RGBA'))
+            new_frame.paste(im, (0, 0), im.convert("RGBA"))
             yield new_frame
 
             last_frame = new_frame
