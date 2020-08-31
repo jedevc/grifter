@@ -48,7 +48,7 @@ def main():
     print(f"\r[*] processed {len(outputs)} frames total")
     print("[*] done")
 
-    outputs[0].save(args.outfile, save_all=True, append_images=outputs[1:], repeat=0)
+    outputs[0].save(args.outfile, save_all=True, append_images=outputs[1:], loop=0)
 
 
 def process_frame(frame, faces, target=None, scale=1):
